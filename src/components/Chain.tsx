@@ -41,13 +41,12 @@ export default function LandingPage({ name, amount, hasEvm, faucetRequest, evmRe
 
     const handleRequest = async () => {
         setLoading(true);
-        const [err, success] = mevm ? await to(evmRequest(address,token)) : await to(faucetRequest(address,token));
-        console.log(err, success);
-        if (success) {
+        const res = mevm ? await evmRequest(address,token) : await faucetRequest(address,token);
+        console.log('res=',res);
+        if (res && res.success) {
             setSuccess(true);
-        } else if (err) {
-            console.log(err);
-            setErrorMessage(err.message || "Failed to fund account.");
+        } else{
+            setErrorMessage(res.error || "Failed to fund account.");
         }
         setLoading(false);
     };
@@ -70,7 +69,7 @@ export default function LandingPage({ name, amount, hasEvm, faucetRequest, evmRe
     //     'theme' : 'light'
     // });
     const onChangeRe = (value:string|null)=> {
-        console.log("Captcha value:", value);
+        // console.log("Captcha value:", value);
         setToken(value);
       }
 
@@ -78,7 +77,7 @@ export default function LandingPage({ name, amount, hasEvm, faucetRequest, evmRe
 
     const onSubmitWithReCAPTCHA = async () => {
         const token = recaptchaRef.current?.getValue();
-        console.log(token);
+        // console.log(token);
     }
       
 
@@ -138,7 +137,7 @@ export default function LandingPage({ name, amount, hasEvm, faucetRequest, evmRe
                             backgroundColor: '#1737FF',
                             '&:hover': { backgroundColor: 'rgb(16, 38, 178)' }
                         }}
-                        disabled={loading||token===null}
+                        disabled={loading||token===null||!isValidHex(address, true)}
                     >
                         <WaterDropIcon sx={{ mr: 1 }} />
                         Get MOVE

@@ -311,9 +311,16 @@ export async function requestFaucet(
   };
   try {
     const response = await axios.get(url,{headers});
+    console.log('response:', response);
     if (response.status === 200) {
-      txns = response.data;
+      // return {success:response.data};
+      if (response.data.error_message) {
+        return {error: response.data.error_message};
+      }
+      return {success:response.data};
     } else {
+      //  return {error: {message:response.data.error_message}};
+      // return {success:response.data};
       throw new Error(`Faucet issue: ${response.status}`);
     }
   } catch (error) {
@@ -321,7 +328,9 @@ export async function requestFaucet(
     throw error;
   }
 
-  return Promise.all(txns.map((txn: string) => aptosClient.waitForTransaction(txn)))
+  return {error:'error'};
+
+  // return Promise.all(txns.map((txn: string) => aptosClient.waitForTransaction(txn)))
 
 }
 
@@ -378,13 +387,20 @@ export async function mevmRequestFaucet(
     }
   });
 
-  if (res.status !== 200) throw new Error(
-    res.data.error.message
-  );
+  // if (res.status !== 200) throw new Error(
+  //   res.data.error.message
+  // );
 
-  console.log(res.data);
+  if(res.status !== 200) {
+    return {error: res.data};
+  }else{
+    if(res.data.error){
+      return {error: res.data.error.message};
+    }else{
+      return {success:res.data};
+    }
+  }
 
-  return res.data;
 }
 
 export async function m2RequestFaucet(
