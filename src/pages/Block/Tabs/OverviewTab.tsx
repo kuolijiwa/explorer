@@ -88,12 +88,7 @@ export default function OverviewTab({data}: OverviewTabProps) {
         />
         <ContentRow
           title={"Timestamp:"}
-          value={
-            <TimestampValue
-              timestamp={data.block_timestamp}
-              ensureMilliSeconds
-            />
-          }
+          value={<TimestampValue timestamp={data.block_timestamp} />}
           tooltip={getLearnMoreTooltip("timestamp")}
         />
         <BlockMetadataRows blockTxn={blockTxn} />

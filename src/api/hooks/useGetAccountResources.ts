@@ -6,15 +6,11 @@ import {useGlobalState} from "../../global-config/GlobalConfig";
 
 export function useGetAccountResources(
   address: string,
-  options?: {
-    retry?: number | boolean;
-  },
 ): UseQueryResult<Types.MoveResource[], ResponseError> {
-  const [state] = useGlobalState();
+  const [state, _setState] = useGlobalState();
 
-  return useQuery<Array<Types.MoveResource>, ResponseError>({
-    queryKey: ["accountResources", {address}, state.network_value],
-    queryFn: () => getAccountResources({address}, state.network_value),
-    retry: options?.retry ?? false,
-  });
+  return useQuery<Array<Types.MoveResource>, ResponseError>(
+    ["accountResources", {address}, state.network_value],
+    () => getAccountResources({address}, state.network_value),
+  );
 }

@@ -6,7 +6,7 @@ import GeneralTableHeaderCell from "../../../components/Table/GeneralTableHeader
 import {assertNever} from "../../../utils";
 import GeneralTableBody from "../../../components/Table/GeneralTableBody";
 import GeneralTableCell from "../../../components/Table/GeneralTableCell";
-import {Link} from "../../../routing";
+import {Link, useNavigate} from "../../../routing";
 
 type TokenCellProps = {
   token: any; // TODO: add graphql data typing
@@ -16,9 +16,7 @@ function TokenNameCell({token}: TokenCellProps) {
   return (
     <GeneralTableCell sx={{textAlign: "left"}}>
       <Link
-        to={`/token/${token?.current_token_data?.token_data_id}/${
-          token?.property_version_v1 ?? 0
-        }`}
+        to={`/token/${token?.token_data_id_hash}/${token?.property_version}`}
         color="primary"
       >
         <Box
@@ -28,7 +26,7 @@ function TokenNameCell({token}: TokenCellProps) {
             textOverflow: "ellipsis",
           }}
         >
-          {token?.current_token_data?.token_name}
+          {token?.name}
         </Box>
       </Link>
     </GeneralTableCell>
@@ -46,7 +44,7 @@ function CollectionNameCell({token}: TokenCellProps) {
         textOverflow: "ellipsis",
       }}
     >
-      {token?.current_token_data?.current_collection?.collection_name}
+      {token?.collection_name}
     </GeneralTableCell>
   );
 }
@@ -61,7 +59,7 @@ function StoreCell({token}: TokenCellProps) {
         textOverflow: "ellipsis",
       }}
     >
-      {token?.table_type_v1}
+      {token?.table_type}
     </GeneralTableCell>
   );
 }
@@ -69,7 +67,7 @@ function StoreCell({token}: TokenCellProps) {
 function PropertyVersionCell({token}: TokenCellProps) {
   return (
     <GeneralTableCell sx={{textAlign: "right"}}>
-      {token?.property_version_v1}
+      {token?.property_version}
     </GeneralTableCell>
   );
 }
@@ -106,12 +104,14 @@ type TokenRowProps = {
 };
 
 function TokenRow({token, columns}: TokenRowProps) {
+  const navigate = useNavigate();
+
+  const rowClick = () => {
+    navigate(`/token/${token?.token_data_id_hash}/${token?.property_version}`);
+  };
+
   return (
-    <GeneralTableRow
-      to={`/token/${token?.current_token_data?.token_data_id}/${
-        token?.property_version_v1 ?? 0
-      }`}
-    >
+    <GeneralTableRow onClick={rowClick}>
       {columns.map((column) => {
         const Cell = TokenCells[column];
         return <Cell key={column} token={token} />;

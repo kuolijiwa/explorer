@@ -20,7 +20,7 @@ export interface Validator {
 }
 
 export function useGetValidatorSet() {
-  const [state] = useGlobalState();
+  const [state, _] = useGlobalState();
   const [totalVotingPower, setTotalVotingPower] = useState<string | null>(null);
   const [numberOfActiveValidators, setNumberOfActiveValidators] = useState<
     number | null

@@ -68,7 +68,6 @@ export function useNetworkSelector() {
         });
       }
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [], // empty [] makes this effect only run once (on mount)
   );
 

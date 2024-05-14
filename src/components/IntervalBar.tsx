@@ -50,9 +50,7 @@ export default function IntervalBar({
       case IntervalType.UNLOCK_COUNTDOWN:
         return (
           <span>
-            {days >= 10
-              ? `${days}d ${hours}h ${minutes}m`
-              : `${days}d ${hours}h ${minutes}m ${seconds}s`}
+            {days}d {hours}h {minutes}m {seconds}s
           </span>
         );
     }

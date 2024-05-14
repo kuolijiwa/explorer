@@ -1,4 +1,5 @@
 import * as React from "react";
+import * as RRD from "react-router-dom";
 import {Table, TableHead, TableRow} from "@mui/material";
 import GeneralTableRow from "../../../components/Table/GeneralTableRow";
 import GeneralTableHeaderCell from "../../../components/Table/GeneralTableHeaderCell";
@@ -7,10 +8,9 @@ import HashButton, {HashType} from "../../../components/HashButton";
 import GeneralTableBody from "../../../components/Table/GeneralTableBody";
 import GeneralTableCell from "../../../components/Table/GeneralTableCell";
 import {Link} from "../../../routing";
-import {GetTokenActivityResponse} from "@aptos-labs/ts-sdk";
 
 type ActivityCellProps = {
-  activity: GetTokenActivityResponse[0];
+  activity: any; // TODO: add graphql data typing
 };
 
 function TransactionVersionCell({activity}: ActivityCellProps) {
@@ -32,7 +32,7 @@ function TransactionVersionCell({activity}: ActivityCellProps) {
 function TransferTypeCell({activity}: ActivityCellProps) {
   return (
     <GeneralTableCell sx={{textAlign: "left"}}>
-      {activity?.type}
+      {activity?.transfer_type}
     </GeneralTableCell>
   );
 }
@@ -41,10 +41,7 @@ function FromCell({activity}: ActivityCellProps) {
   return (
     <GeneralTableCell sx={{textAlign: "left"}}>
       {activity?.from_address === null ? null : (
-        <HashButton
-          hash={activity?.from_address ?? ""}
-          type={HashType.ACCOUNT}
-        />
+        <HashButton hash={activity?.from_address} type={HashType.ACCOUNT} />
       )}
     </GeneralTableCell>
   );
@@ -54,7 +51,7 @@ function ToCell({activity}: ActivityCellProps) {
   return (
     <GeneralTableCell sx={{textAlign: "left"}}>
       {activity?.to_address === null ? null : (
-        <HashButton hash={activity?.to_address ?? ""} type={HashType.ACCOUNT} />
+        <HashButton hash={activity?.to_address} type={HashType.ACCOUNT} />
       )}
     </GeneralTableCell>
   );
@@ -63,7 +60,7 @@ function ToCell({activity}: ActivityCellProps) {
 function PropertyVersionCell({activity}: ActivityCellProps) {
   return (
     <GeneralTableCell sx={{textAlign: "right"}}>
-      {activity?.property_version_v1}
+      {activity?.property_version}
     </GeneralTableCell>
   );
 }
@@ -141,7 +138,7 @@ function ActivityHeaderCell({column}: ActivityHeaderCellProps) {
 }
 
 type ActivitiesTableProps = {
-  activities: GetTokenActivityResponse; // TODO: add graphql data typing
+  activities: any[]; // TODO: add graphql data typing
   columns?: Column[];
 };
 

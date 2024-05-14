@@ -14,39 +14,13 @@ import React, {useState} from "react";
 import CloseIcon from "@mui/icons-material/Close";
 import AptosBannerImage from "../assets/Banner.jpg";
 
-type PillColors =
-  | "primary"
-  | "secondary"
-  | "error"
-  | "info"
-  | "success"
-  | "warning"
-  | "inherit";
-const PillColors: Record<PillColors, string> = {
-  error: "#f44336",
-  info: "#2196f3",
-  primary: "#8B5CF6",
-  secondary: "#f50057",
-  success: "#4caf50",
-  warning: "#ff9800",
-  inherit: "inherit",
-};
-
 interface BannerProps {
   children: React.ReactNode;
   action?: React.ReactNode;
   sx?: SxProps<Theme>;
-  pillText?: string;
-  pillColor?: PillColors;
 }
 
-export function Banner({
-  children,
-  action,
-  sx,
-  pillText,
-  pillColor = "primary",
-}: BannerProps) {
+export function Banner({children, action, sx}: BannerProps) {
   const [bannerOpen, setBannerOpen] = useState<boolean>(true);
   const theme = useTheme();
   const isOnMobile = !useMediaQuery(theme.breakpoints.up("md"));
@@ -68,20 +42,19 @@ export function Banner({
     </IconButton>
   );
 
-  const pill = Boolean(pillText) && (
+  const icon = (
     <Typography
       sx={{
-        backgroundColor: PillColors[pillColor],
+        backgroundColor: "#8B5CF6",
         color: "#ffffff",
         borderRadius: 1,
         paddingX: 1,
+        width: "3rem",
         minWidth: "3rem",
         height: "1.5rem",
-        flex: "0 0 auto",
-        textAlign: "center",
       }}
     >
-      {pillText}
+      NEW
     </Typography>
   );
 
@@ -123,7 +96,7 @@ export function Banner({
                 paddingTop: 0.5,
               }}
             >
-              {pill}
+              {icon}
               {text}
             </Stack>
           </Alert>
@@ -152,7 +125,7 @@ export function Banner({
                 verticalAlign: "center",
               }}
             >
-              {pill}
+              {icon}
               {text}
             </Stack>
           </Alert>

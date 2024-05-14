@@ -37,7 +37,7 @@ export default function BlockPage() {
       <PageHeader />
       <Grid item xs={12}>
         <Stack direction="column" spacing={4} marginTop={2}>
-          <BlockTitle />
+          <BlockTitle height={data.block_height} />
           <BlockTabs data={data} />
         </Stack>
       </Grid>

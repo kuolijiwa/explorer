@@ -45,7 +45,7 @@ function ResourcesContent({
 
 type ResourcesTabProps = {
   address: string;
-  accountData: Types.AccountData | Types.MoveResource[] | undefined;
+  accountData: Types.AccountData | undefined;
 };
 
 export default function ResourcesTab({address}: ResourcesTabProps) {

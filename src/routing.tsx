@@ -13,7 +13,6 @@ const GLOBAL_PERSISTENT_SEARCH_PARAMS = ["network", "feature"];
 export const Link = ({
   to,
   children,
-  onClick,
   ...props
 }: Omit<React.ComponentProps<typeof MuiLink>, "component"> & {
   to: string;
@@ -27,7 +26,6 @@ export const Link = ({
       to={augmentToWithGlobalSearchParams(to)}
       onClick={(e) => {
         e.stopPropagation();
-        if (onClick) onClick(e);
       }}
     >
       {children}

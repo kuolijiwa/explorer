@@ -1,6 +1,5 @@
 import {ApolloError, gql, useQuery as useGraphqlQuery} from "@apollo/client";
 import {Types} from "aptos";
-import {normalizeAddress} from "../../utils";
 
 export interface DelegatedStakingActivity {
   amount: number;
@@ -41,8 +40,11 @@ export function useGetDelegatedStakeOperationActivities(
   loading: boolean;
   error: ApolloError | undefined;
 } {
-  const delegatorAddress64Hash = normalizeAddress(delegatorAddress);
-  const poolAddress64Hash = normalizeAddress(poolAddress);
+  // whenever talking to the indexer, the address needs to fill in leading 0s
+  // for example: 0x123 => 0x000...000123  (61 0s before 123)
+  const delegatorAddress64Hash =
+    "0x" + delegatorAddress.substring(2).padStart(64, "0");
+  const poolAddress64Hash = "0x" + poolAddress.substring(2).padStart(64, "0");
 
   const {loading, error, data} = useGraphqlQuery(
     DELEGATED_STAKING_ACTIVITY_QUERY,

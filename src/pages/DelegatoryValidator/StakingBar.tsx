@@ -7,31 +7,28 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import {useContext, useEffect, useState} from "react";
+import React, { useContext, useEffect, useState } from "react";
 import ContentBoxSpaceBetween from "../../components/IndividualPageContent/ContentBoxSpaceBetween";
-import {APTCurrencyValue} from "../../components/IndividualPageContent/ContentValue/CurrencyValue";
+import { APTCurrencyValue } from "../../components/IndividualPageContent/ContentValue/CurrencyValue";
 import ArrowCircleUpIcon from "@mui/icons-material/ArrowCircleUp";
-import {grey} from "../../themes/colors/aptosColorPalette";
-import {useWallet} from "@aptos-labs/wallet-adapter-react";
+import { grey } from "../../themes/colors/aptosColorPalette";
+import { useWallet } from "@aptos-labs/wallet-adapter-react";
 import WalletConnectionDialog from "./WalletConnectionDialog";
 import StyledTooltip, {
   StyledLearnMoreTooltip,
 } from "../../components/StyledTooltip";
 import StakeOperationDialog from "./StakeOperationDialog";
-import {StakeOperation} from "../../api/hooks/useSubmitStakeOperation";
-import {useGetDelegationNodeInfo} from "../../api/hooks/useGetDelegationNodeInfo";
-import {DelegationStateContext} from "./context/DelegationContext";
-import {useGetAccountAPTBalance} from "../../api/hooks/useGetAccountAPTBalance";
-import {MINIMUM_APT_IN_POOL_FOR_EXPLORER} from "./constants";
-import {OCTA} from "../../constants";
-import {AptosClient, Types} from "aptos";
-import {getAddStakeFee} from "../../api";
-import {useGetDelegatorStakeInfo} from "../../api/hooks/useGetDelegatorStakeInfo";
-import {useGlobalState} from "../../global-config/GlobalConfig";
-import {ValidatorData} from "../../api/hooks/useGetValidators";
-import {useLogEventWithBasic} from "../Account/hooks/useLogEventWithBasic";
-import {useGetValidatorSet} from "../../api/hooks/useGetValidatorSet";
-import {calculateNetworkPercentage} from "./utils";
+import { StakeOperation } from "../../api/hooks/useSubmitStakeOperation";
+import { useGetDelegationNodeInfo } from "../../api/hooks/useGetDelegationNodeInfo";
+import { DelegationStateContext } from "./context/DelegationContext";
+import { useGetAccountAPTBalance } from "../../api/hooks/useGetAccountAPTBalance";
+import { MINIMUM_APT_IN_POOL_FOR_EXPLORER } from "./constants";
+import { OCTA } from "../../constants";
+import { AptosClient, Types } from "aptos";
+import { getAddStakeFee } from "../../api";
+import { useGetDelegatorStakeInfo } from "../../api/hooks/useGetDelegatorStakeInfo";
+import { Statsig } from "statsig-react";
+import { useGlobalState } from "../../global-config/GlobalConfig";
 
 type ValidatorStakingBarProps = {
   setIsStakingBarSkeletonLoading: (arg: boolean) => void;
@@ -42,48 +39,26 @@ export default function StakingBar({
   setIsStakingBarSkeletonLoading,
   isSkeletonLoading,
 }: ValidatorStakingBarProps) {
-  const {accountResource, validator} = useContext(DelegationStateContext);
+  const { accountResource, validator } = useContext(DelegationStateContext);
 
   if (!validator || !accountResource) {
     return null;
   }
 
-  return (
-    <StakingBarContent
-      setIsStakingBarSkeletonLoading={setIsStakingBarSkeletonLoading}
-      isSkeletonLoading={isSkeletonLoading}
-      validator={validator}
-    />
-  );
-}
-
-function StakingBarContent({
-  setIsStakingBarSkeletonLoading,
-  isSkeletonLoading,
-  validator,
-}: ValidatorStakingBarProps & {
-  validator: ValidatorData;
-}) {
   const theme = useTheme();
-  const logEvent = useLogEventWithBasic();
   const isOnMobile = !useMediaQuery(theme.breakpoints.up("md"));
-  const {connected, wallet, account} = useWallet();
-  const {commission, isQueryLoading} = useGetDelegationNodeInfo({
-    validatorAddress: validator.owner_address,
-  });
-  const {totalVotingPower} = useGetValidatorSet();
-  const validatorVotingPower = validator.voting_power;
-  const networkPercentage = calculateNetworkPercentage(
-    validatorVotingPower,
-    totalVotingPower,
-  );
+  const { connected, wallet, account } = useWallet();
+  const { delegatedStakeAmount, networkPercentage, commission, isQueryLoading } =
+    useGetDelegationNodeInfo({
+      validatorAddress: validator.owner_address,
+    });
 
   const [dialogOpen, setDialogOpen] = useState<boolean>(false);
 
   const handleClickOpen = () => {
-    logEvent("stake_button_clicked", validator.owner_address, {
+    Statsig.logEvent("stake_button_clicked", validator.owner_address, {
       commission: commission?.toString() ?? "",
-      delegated_stake_amount: validatorVotingPower ?? "",
+      delegated_stake_amount: delegatedStakeAmount ?? "",
       network_percentage: networkPercentage ?? "",
       wallet_address: account?.address ?? "",
       wallet_name: wallet?.name ?? "",
@@ -98,13 +73,13 @@ function StakingBarContent({
     if (!isQueryLoading) {
       setIsStakingBarSkeletonLoading(false);
     }
-  }, [isQueryLoading, setIsStakingBarSkeletonLoading]);
+  }, [isQueryLoading]);
 
   const stakeAmount = (
     <Stack direction="column" spacing={0.5}>
-      <Typography sx={{fontWeight: 600}}>
+      <Typography sx={{ fontWeight: 600 }}>
         <APTCurrencyValue
-          amount={validatorVotingPower ?? ""}
+          amount={delegatedStakeAmount ?? ""}
           fixedDecimalPlaces={0}
         />
       </Typography>
@@ -119,7 +94,7 @@ function StakingBarContent({
 
   const delegatedStakePercentage = (
     <Stack direction="column" spacing={0.5}>
-      <Typography sx={{fontWeight: 600}}>{networkPercentage}%</Typography>
+      <Typography sx={{ fontWeight: 600 }}>{networkPercentage}%</Typography>
       <Typography variant="body2" color={grey[450]}>
         Of Network
       </Typography>
@@ -128,7 +103,7 @@ function StakingBarContent({
 
   const rewardsEarned = (
     <Stack direction="column" spacing={0.5}>
-      <Typography sx={{fontWeight: 600}}>
+      <Typography sx={{ fontWeight: 600 }}>
         <APTCurrencyValue
           amount={Number(validator.apt_rewards_distributed).toFixed(0)}
           decimals={0}
@@ -144,8 +119,9 @@ function StakingBarContent({
   );
 
   const balance = useGetAccountAPTBalance(account?.address!);
-  const [state] = useGlobalState();
-  const {stakes} = useGetDelegatorStakeInfo(
+  const [state, _] = useGlobalState();
+  const client = new AptosClient(state.network_value);
+  const { stakes } = useGetDelegatorStakeInfo(
     account?.address!,
     validator.owner_address,
   );
@@ -155,12 +131,11 @@ function StakingBarContent({
   const buttonDisabled =
     account !== null &&
     Number(balance) <=
-      (Number(stakes[0]) === 0
-        ? MINIMUM_APT_IN_POOL_FOR_EXPLORER * OCTA + Number(addStakeFee)
-        : Number(addStakeFee));
+    (Number(stakes[0]) === 0
+      ? MINIMUM_APT_IN_POOL_FOR_EXPLORER * OCTA + Number(addStakeFee)
+      : Number(addStakeFee));
 
   useEffect(() => {
-    const client = new AptosClient(state.network_value);
     async function fetchData() {
       const fee = await getAddStakeFee(
         client,
@@ -170,21 +145,21 @@ function StakingBarContent({
       setAddStakeFee(fee[0]);
     }
     fetchData();
-  }, [state.network_value, balance, validator]);
+  }, [state.network_value, balance]);
 
   const stakeButton = (
     <StyledTooltip
-      title={`You can't stake because minimum 11 APT requirement is not met`}
+      title={`You can't stake because minimum 11 MOVE requirement is not met`}
       disableHoverListener={!buttonDisabled}
     >
       <span>
         <Button
           variant="primary"
           onClick={handleClickOpen}
-          sx={{width: "10px", maxHeight: "40px"}}
+          sx={{ width: "10px", maxHeight: "40px" }}
           disabled={buttonDisabled}
         >
-          <ArrowCircleUpIcon sx={{marginRight: 1}} />
+          <ArrowCircleUpIcon sx={{ marginRight: 1 }} />
           <Typography>Stake</Typography>
         </Button>
       </span>

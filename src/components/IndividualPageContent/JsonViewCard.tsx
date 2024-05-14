@@ -4,8 +4,11 @@ import ReactJson from "react-json-view";
 import {codeBlockColor} from "../../themes/colors/aptosColorPalette";
 import EmptyValue from "./ContentValue/EmptyValue";
 
-const TEXT_COLOR_LIGHT = "#0EA5E9";
-const TEXT_COLOR_DARK = "#83CCED";
+// const TEXT_COLOR_LIGHT = "#49D6CE";
+// const TEXT_COLOR_DARK = "#83CCED";
+
+const TEXT_COLOR_LIGHT = "#FFD016";
+const TEXT_COLOR_DARK = "#FFD016";
 const SECONDARY_TEXT_COLOR = "rgba(14,165,233,0.3)";
 const TRANSPARENT = "rgba(0,0,0,0)";
 
@@ -19,8 +22,8 @@ function useJsonViewCardTheme() {
     theme.palette.mode === "dark" ? TEXT_COLOR_DARK : TEXT_COLOR_LIGHT;
 
   return {
-    scheme: "aptos_explorer",
-    author: "aptos",
+    scheme: "movement_explorer",
+    author: "movement",
     base00: TRANSPARENT,
     base01: textColor,
     base02: SECONDARY_TEXT_COLOR, // line color
@@ -50,7 +53,6 @@ export default function JsonViewCard({
   collapsedByDefault,
 }: JsonViewCardProps) {
   const theme = useTheme();
-  const jsonViewCardTheme = useJsonViewCardTheme();
 
   if (!data) {
     return <EmptyValue />;
@@ -68,7 +70,7 @@ export default function JsonViewCard({
     >
       <ReactJson
         src={data}
-        theme={jsonViewCardTheme}
+        theme={useJsonViewCardTheme()}
         name={null}
         collapseStringsAfterLength={COLLAPSE_STRINGS_AFTER_LENGTH}
         displayObjectSize={false}

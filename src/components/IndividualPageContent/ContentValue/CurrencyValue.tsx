@@ -65,7 +65,7 @@ export default function CurrencyValue({
   fixedDecimalPlaces,
   currencyCode,
 }: CurrencyValueProps) {
-  const number = getFormattedBalanceStr(amount, decimals, fixedDecimalPlaces);
+  let number = getFormattedBalanceStr(amount, decimals, fixedDecimalPlaces);
   if (currencyCode) {
     return (
       <span>
@@ -90,8 +90,8 @@ export function APTCurrencyValue({
 
   return (
     <CurrencyValue
-      {...{amount, decimals, fixedDecimalPlaces}}
-      currencyCode="APT"
+      {...{ amount, decimals, fixedDecimalPlaces }}
+      currencyCode="MOVE"
     />
   );
 }

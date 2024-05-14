@@ -12,7 +12,7 @@ interface BlockResourceData {
 }
 
 export function useGetEpochTime() {
-  const [state] = useGlobalState();
+  const [state, _] = useGlobalState();
   const [curEpoch, setCurEpoch] = useState<string>();
   const [lastEpochTime, setLastEpochTime] = useState<string>();
   const [epochInterval, setEpochInterval] = useState<string>();

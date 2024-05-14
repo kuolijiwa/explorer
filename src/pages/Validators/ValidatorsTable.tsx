@@ -20,18 +20,11 @@ function getSortedValidators(
   validators: ValidatorData[],
   column: Column,
   direction: "desc" | "asc",
-  filterZeroVotingPower = true,
 ) {
   const validatorsCopy: ValidatorData[] = JSON.parse(
     JSON.stringify(validators),
   );
-  let filteredValidators = validatorsCopy;
-  if (filterZeroVotingPower) {
-    filteredValidators = validatorsCopy.filter((validator) => {
-      return Number(validator.voting_power) !== 0;
-    });
-  }
-  const orderedValidators = getValidatorsOrderedBy(filteredValidators, column);
+  const orderedValidators = getValidatorsOrderedBy(validatorsCopy, column);
 
   return direction === "desc" ? orderedValidators : orderedValidators.reverse();
 }
@@ -185,11 +178,7 @@ export function ValidatorAddrCell({validator}: ValidatorCellProps) {
 export function OperatorAddrCell({validator}: ValidatorCellProps) {
   return (
     <GeneralTableCell sx={{textAlign: "left"}}>
-      <HashButton
-        hash={validator.operator_address}
-        type={HashType.ACCOUNT}
-        isValidator
-      />
+      <HashButton hash={validator.operator_address} type={HashType.ACCOUNT} />
     </GeneralTableCell>
   );
 }
@@ -282,8 +271,8 @@ function ValidatorRow({validator, columns}: ValidatorRowProps) {
 }
 
 export function ValidatorsTable() {
-  const [state] = useGlobalState();
-  const {validators} = useGetValidators();
+  const [state, _] = useGlobalState();
+  const {validators} = useGetValidators(state.network_name);
 
   const [sortColumn, setSortColumn] = useState<Column>("votingPower");
   const [sortDirection, setSortDirection] = useState<"desc" | "asc">("desc");

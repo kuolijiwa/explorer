@@ -31,7 +31,6 @@ type LineChartProps = {
   dataset: number[];
   fill?: boolean;
   tooltipsLabelFunc?: (context: any) => string;
-  decimals?: number;
 };
 
 export default function LineChart({
@@ -39,7 +38,6 @@ export default function LineChart({
   dataset,
   fill,
   tooltipsLabelFunc,
-  decimals,
 }: LineChartProps) {
   const options = {
     responsive: true,
@@ -74,7 +72,7 @@ export default function LineChart({
       },
       y: {
         ticks: {
-          callback: (value: any) => numberFormatter(value, decimals ?? 0),
+          callback: (value: any) => numberFormatter(value, 0),
           autoSkip: true,
           maxTicksLimit: 3,
         },

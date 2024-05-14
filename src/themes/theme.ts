@@ -218,7 +218,7 @@ const getDesignTokens = (mode: PaletteMode): ThemeOptions => ({
     // Autocomplete overrides
     MuiAutocomplete: {
       styleOverrides: {
-        root: () => ({
+        root: ({theme}) => ({
           listbox: {
             padding: "0",
           },
@@ -268,7 +268,7 @@ const getDesignTokens = (mode: PaletteMode): ThemeOptions => ({
 
     MuiInput: {
       styleOverrides: {
-        root: () => ({
+        root: ({theme}) => ({
           borderRadius: 2,
         }),
       },

@@ -56,7 +56,7 @@ async function fetchTotalSupply(
 }
 
 export function useGetCoinSupplyLimit(): number | null {
-  const [state] = useGlobalState();
+  const [state, _] = useGlobalState();
   const [totalSupply, setTotalSupply] = useState<number | null>(null);
   const {data: coinInfo} = useGetAccountResource(
     "0x1",

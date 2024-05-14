@@ -1,3 +1,4 @@
+import * as React from "react";
 import Button from "@mui/material/Button";
 import ArrowBackRoundedIcon from "@mui/icons-material/ArrowBackRounded";
 import {useNavigate} from "../routing";
@@ -24,7 +25,11 @@ function BackButton(handleClick: () => void) {
   );
 }
 
-export default function GoBack(): JSX.Element | null {
+type GoBackProps = {
+  to?: string;
+};
+
+export default function GoBack({to}: GoBackProps): JSX.Element | null {
   const navigate = useNavigate();
 
   if (window.history.state && window.history.state.idx > 0) {
@@ -32,6 +37,12 @@ export default function GoBack(): JSX.Element | null {
       navigate(-1);
     });
   } else {
-    return null;
+    if (to != null) {
+      return BackButton(() => {
+        navigate(to);
+      });
+    } else {
+      return null;
+    }
   }
 }

@@ -60,14 +60,12 @@ export default function TokenTabs({
   data,
   tabValues = TAB_VALUES,
 }: AccountTabsProps): JSX.Element {
-  const {propertyVersion, tab, tokenId} = useParams();
+  const {tab, propertyVersion, tokenId} = useParams();
   const navigate = useNavigate();
   const value = tab === undefined ? TAB_VALUES[0] : (tab as TabValue);
 
   const handleChange = (event: React.SyntheticEvent, newValue: TabValue) => {
-    navigate(`/token/${tokenId}/${propertyVersion}/${newValue}`, {
-      replace: true,
-    });
+    navigate(`/token/${tokenId}/${propertyVersion}/${newValue}`);
   };
 
   return (

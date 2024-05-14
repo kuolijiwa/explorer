@@ -1,12 +1,12 @@
 import React from "react";
 import {ActivitiesTable} from "../Component/ActivitiesTable";
 import EmptyTabContent from "../../../components/IndividualPageContent/EmptyTabContent";
+import {
+  useGetTokensActivities,
+  useGetTokensActivitiesCount,
+} from "../../../api/hooks/useGetTokenActivities";
 import {useSearchParams} from "react-router-dom";
 import {Box, Pagination, Stack} from "@mui/material";
-import {
-  useGetTokenActivities,
-  useGetTokenActivitiesCount,
-} from "../../../api/hooks/useGetAccountTokens";
 
 const LIMIT = 20;
 
@@ -44,25 +44,25 @@ function RenderPagination({
 }
 
 type TokenActivitiesWithPaginationProps = {
-  tokenId: string;
+  tokenDataIdHash: string;
   numPages: number;
 };
 
 export function TokenActivitiesWithPagination({
-  tokenId,
+  tokenDataIdHash,
   numPages,
 }: TokenActivitiesWithPaginationProps) {
-  const [searchParams] = useSearchParams();
+  const [searchParams, _setSearchParams] = useSearchParams();
   const currentPage = parseInt(searchParams.get("page") ?? "1");
   const offset = (currentPage - 1) * LIMIT;
 
-  const {data: activities} = useGetTokenActivities(tokenId, LIMIT, offset);
+  const activities = useGetTokensActivities(tokenDataIdHash, LIMIT, offset);
 
   return (
     <>
       <Stack spacing={2}>
         <Box sx={{width: "auto", overflowX: "auto"}}>
-          <ActivitiesTable activities={activities ?? []} />
+          <ActivitiesTable activities={activities} />
         </Box>
         {numPages > 1 && (
           <Box sx={{display: "flex", justifyContent: "center"}}>
@@ -82,16 +82,20 @@ type ActivitiesTabProps = {
 export default function ActivitiesTab({
   data: activitiesData,
 }: ActivitiesTabProps) {
-  const tokenId = activitiesData?.token_data_id;
-  const {data: activitiesCount} = useGetTokenActivitiesCount(tokenId);
+  const activitiesCount = useGetTokensActivitiesCount(
+    activitiesData?.token_data_id_hash,
+  );
 
-  if (activitiesCount === undefined || !tokenId) {
+  if (activitiesCount === undefined || !activitiesData?.token_data_id_hash) {
     return <EmptyTabContent />;
   }
 
   const numPages = Math.ceil(activitiesCount / LIMIT);
 
   return (
-    <TokenActivitiesWithPagination tokenId={tokenId} numPages={numPages} />
+    <TokenActivitiesWithPagination
+      tokenDataIdHash={activitiesData?.token_data_id_hash}
+      numPages={numPages}
+    />
   );
 }

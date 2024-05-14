@@ -1,17 +1,8 @@
 import React from "react";
-import {
-  AutocompleteRenderInputParams,
-  CircularProgress,
-  InputAdornment,
-  TextField,
-} from "@mui/material";
+import {InputAdornment, TextField} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 
-interface SearchInputProps extends AutocompleteRenderInputParams {
-  loading?: boolean;
-}
-
-export default function SearchInput({loading, ...params}: SearchInputProps) {
+export default function SearchInput({...params}) {
   return (
     <form style={{width: "100%"}}>
       <TextField
@@ -29,11 +20,6 @@ export default function SearchInput({loading, ...params}: SearchInputProps) {
               sx={{ml: 0.5, marginTop: "0!important"}}
             >
               <SearchIcon fontSize="large" color="secondary" />
-            </InputAdornment>
-          ),
-          endAdornment: loading && (
-            <InputAdornment position="end">
-              <CircularProgress size={20} />
             </InputAdornment>
           ),
         }}

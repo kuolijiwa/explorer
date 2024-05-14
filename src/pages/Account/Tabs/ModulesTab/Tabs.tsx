@@ -9,7 +9,6 @@ import ViewCode from "./ViewCode";
 import Contract from "./Contract";
 import {useNavigate} from "../../../../routing";
 import {useLogEventWithBasic} from "../../hooks/useLogEventWithBasic";
-import {accountPagePath} from "../../Index";
 
 const TabComponents = Object.freeze({
   code: ViewCode,
@@ -35,41 +34,22 @@ function getTabLabel(value: TabValue): string {
 type TabPanelProps = {
   value: TabValue;
   address: string;
-  isObject: boolean;
 };
 
-function RunContract({
-  address,
-  isObject,
-}: {
-  address: string;
-  isObject: boolean;
-}) {
-  return <Contract address={address} isObject={isObject} isRead={false} />;
+function RunContract({address}: {address: string}) {
+  return <Contract address={address} isRead={false} />;
 }
 
-function ReadContract({
-  address,
-  isObject,
-}: {
-  address: string;
-  isObject: boolean;
-}) {
-  return <Contract address={address} isObject={isObject} isRead={true} />;
+function ReadContract({address}: {address: string}) {
+  return <Contract address={address} isRead />;
 }
 
-function TabPanel({value, address, isObject}: TabPanelProps): JSX.Element {
+function TabPanel({value, address}: TabPanelProps): JSX.Element {
   const TabComponent = TabComponents[value];
-  return <TabComponent address={address} isObject={isObject} />;
+  return <TabComponent address={address} />;
 }
 
-function ModulesTabs({
-  address,
-  isObject,
-}: {
-  address: string;
-  isObject: boolean;
-}): JSX.Element {
+function ModulesTabs({address}: {address: string}): JSX.Element {
   const theme = useTheme();
   const tabValues = Object.keys(TabComponents) as TabValue[];
   const {selectedFnName, selectedModuleName, modulesTab} = useParams();
@@ -94,9 +74,8 @@ function ModulesTabs({
     eventName && logEvent(eventName);
 
     navigate(
-      `/${accountPagePath(isObject)}/${address}/modules/${newValue}/${selectedModuleName}` +
+      `/account/${address}/modules/${newValue}/${selectedModuleName}` +
         (selectedFnName ? `/${selectedFnName}` : ``),
-      {replace: true},
     );
   };
 
@@ -114,7 +93,6 @@ function ModulesTabs({
         break;
     }
     eventName && logEvent(eventName);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [value]);
 
   return (
@@ -163,7 +141,7 @@ function ModulesTabs({
         </StyledTabs>
       </Box>
       <Box>
-        <TabPanel value={value} address={address} isObject={isObject} />
+        <TabPanel value={value} address={address} />
       </Box>
     </Box>
   );

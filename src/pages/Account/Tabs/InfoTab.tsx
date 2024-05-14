@@ -8,11 +8,11 @@ import {getLearnMoreTooltip} from "../../Transaction/helpers";
 
 type InfoTabProps = {
   address: string;
-  accountData: Types.AccountData | Types.MoveResource[] | undefined;
+  accountData: Types.AccountData | undefined;
 };
 
 export default function InfoTab({accountData}: InfoTabProps) {
-  if (!accountData || Array.isArray(accountData)) {
+  if (!accountData) {
     return <EmptyTabContent />;
   }
 

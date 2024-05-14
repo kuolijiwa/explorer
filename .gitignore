@@ -9,7 +9,7 @@
 /coverage
 
 # production
-/build
+# /build
 
 # IDEs and editors
 /.idea
@@ -29,3 +29,6 @@ yarn-error.log*
 
 # Local Netlify folder
 .netlify
+movement-explorer.txt
+
+yarn.lock

@@ -1,14 +1,11 @@
-import {HexString, Types} from "aptos";
+import {Types} from "aptos";
 import {ReactNode, useEffect, useMemo, useState} from "react";
 import Error from "../../Error";
 import {useGetAccountModules} from "../../../../api/hooks/useGetAccountModules";
 import EmptyTabContent from "../../../../components/IndividualPageContent/EmptyTabContent";
 import SidebarItem from "../../Components/SidebarItem";
 import {WalletConnector} from "@aptos-labs/wallet-adapter-mui-design";
-import {
-  useWallet,
-  InputTransactionData,
-} from "@aptos-labs/wallet-adapter-react";
+import {useWallet} from "@aptos-labs/wallet-adapter-react";
 import {
   Grid,
   Box,
@@ -39,39 +36,58 @@ import {
 import {useLogEventWithBasic} from "../../hooks/useLogEventWithBasic";
 import {ContentCopy} from "@mui/icons-material";
 import StyledTooltip from "../../../../components/StyledTooltip";
-import {encodeInputArgsForViewRequest} from "../../../../utils";
-import {accountPagePath} from "../../Index";
 
 type ContractFormType = {
   typeArgs: string[];
   args: string[];
-  ledgerVersion?: string;
 };
 
 interface ContractSidebarProps {
   selectedModuleName: string | undefined;
   selectedFnName: string | undefined;
   moduleAndFnsGroup: Record<string, Types.MoveFunction[]>;
-  getLinkToFn(moduleName: string, fnName: string, isObject: boolean): string;
-  isObject: boolean;
+  getLinkToFn(moduleName: string, fnName: string): string;
 }
 
-function Contract({
-  address,
-  isObject,
-  isRead,
-}: {
-  address: string;
-  isObject: boolean;
-  isRead: boolean;
-}) {
+function Contract({address, isRead}: {address: string; isRead: boolean}) {
   const theme = useTheme();
+  const isWideScreen = useMediaQuery(theme.breakpoints.up("md"));
   const {data, isLoading, error} = useGetAccountModules(address);
   const {selectedModuleName, selectedFnName} = useParams();
   const sortedPackages: PackageMetadata[] = useGetAccountPackages(address);
   const selectedModule = sortedPackages
     .flatMap((pkg) => pkg.modules)
     .find((module) => module.name === selectedModuleName);
+
+  if (!isRead && !isWideScreen) {
+    return (
+      <Grid item xs={12}>
+        <Box
+          padding={3}
+          bgcolor={theme.palette.mode === "dark" ? grey[800] : grey[100]}
+          borderRadius={1}
+        >
+          <Typography
+            fontSize={16}
+            fontWeight={500}
+            marginBottom={"16px"}
+            color={theme.palette.mode === "dark" ? grey[300] : grey[600]}
+          >
+            Unfortunately, we are not supporting <b>Run</b> entry functions on
+            mobile at the moment.
+          </Typography>
+
+          <Typography
+            fontSize={12}
+            fontWeight={500}
+            color={theme.palette.mode === "dark" ? grey[400] : grey[500]}
+          >
+            Please, use a laptop or a desktop computer.
+          </Typography>
+        </Box>
+      </Grid>
+    );
+  }
 
   if (isLoading) {
     return null;
@@ -86,27 +102,26 @@ function Contract({
     return <EmptyTabContent />;
   }
 
-  const moduleAndFnsGroup = modules.reduce(
-    (acc, module) => {
-      if (module.abi === undefined) {
-        return acc;
-      }
+  const moduleAndFnsGroup = modules.reduce((acc, module) => {
+    if (module.abi === undefined) {
+      return acc;
+    }
 
-      const fns = module.abi.exposed_functions.filter((fn) =>
-        isRead ? fn.is_view : fn.is_entry,
-      );
-      if (fns.length === 0) {
-        return acc;
-      }
+    const fns = module.abi.exposed_functions.filter((fn) =>
+      isRead
+        ? fn.is_view
+        : fn.is_entry && fn.params.length > 0 && fn.params[0] === "&signer",
+    );
+    if (fns.length === 0) {
+      return acc;
+    }
 
-      const moduleName = module.abi.name;
-      return {
-        ...acc,
-        [moduleName]: fns,
-      } as Record<string, Types.MoveFunction[]>;
-    },
-    {} as Record<string, Types.MoveFunction[]>,
-  );
+    const moduleName = module.abi.name;
+    return {
+      ...acc,
+      [moduleName]: fns,
+    } as Record<string, Types.MoveFunction[]>;
+  }, {} as Record<string, Types.MoveFunction[]>);
 
   const module = modules.find((m) => m.abi?.name === selectedModuleName)?.abi;
   const fn = selectedModuleName
@@ -115,11 +130,11 @@ function Contract({
       )
     : undefined;
 
-  function getLinkToFn(moduleName: string, fnName: string, isObject: boolean) {
+  function getLinkToFn(moduleName: string, fnName: string) {
     // This string implicitly depends on the fact that
     // the `isRead` value is determined by the
     // pathname `view` and `run`.
-    return `/${accountPagePath(isObject)}/${address}/modules/${
+    return `/account/${address}/modules/${
       isRead ? "view" : "run"
     }/${moduleName}/${fnName}`;
   }
@@ -135,7 +150,6 @@ function Contract({
           selectedFnName={selectedFnName}
           moduleAndFnsGroup={moduleAndFnsGroup}
           getLinkToFn={getLinkToFn}
-          isObject={isObject}
         />
       </Grid>
       <Grid item md={9} xs={12}>
@@ -169,7 +183,6 @@ function ContractSidebar({
   selectedFnName,
   moduleAndFnsGroup,
   getLinkToFn,
-  isObject,
 }: ContractSidebarProps) {
   const theme = useTheme();
   const isWideScreen = useMediaQuery(theme.breakpoints.up("md"));
@@ -219,7 +232,7 @@ function ContractSidebar({
                       return (
                         <SidebarItem
                           key={fn.name}
-                          linkTo={getLinkToFn(moduleName, fn.name, isObject)}
+                          linkTo={getLinkToFn(moduleName, fn.name)}
                           selected={selected}
                           name={fn.name}
                           loggingInfo={{
@@ -246,7 +259,7 @@ function ContractSidebar({
           )}
           onChange={(_, fn) => {
             fn && logEvent("function_name_clicked", fn.fnName);
-            fn && navigate(getLinkToFn(fn.moduleName, fn.fnName, isObject));
+            fn && navigate(getLinkToFn(fn.moduleName, fn.fnName));
           }}
           value={
             selectedModuleName && selectedFnName
@@ -277,31 +290,14 @@ function RunContractForm({
   const {submitTransaction, transactionResponse, transactionInProcess} =
     useSubmitTransaction();
 
-  const fnParams = removeSignerParam(fn);
-
   const onSubmit: SubmitHandler<ContractFormType> = async (data) => {
     logEvent("write_button_clicked", fn.name);
-
-    const payload: InputTransactionData = {
-      data: {
-        function: `${module.address}::${module.name}::${fn.name}`,
-        typeArguments: data.typeArgs,
-        functionArguments: data.args.map((arg, i) => {
-          const type = fnParams[i];
-          if (type.includes("vector")) {
-            // when it's a vector<u8>, we support both hex and javascript array format
-            return type === "vector<u8>" && arg.trim().startsWith("0x")
-              ? Array.from(new HexString(arg).toUint8Array()).map((x) =>
-                  x.toString(),
-                )
-              : JSON.parse(arg);
-          } else if (type.startsWith("0x1::option::Option")) {
-            return arg !== "" ? {vec: [arg]} : undefined;
-          } else return arg;
-        }),
-      },
+    const payload: Types.TransactionPayload = {
+      type: "entry_function_payload",
+      function: `${module.address}::${module.name}::${fn.name}`,
+      type_arguments: data.typeArgs,
+      arguments: data.args,
     };
-
     await submitTransaction(payload);
     if (transactionResponse?.transactionSubmitted) {
       logEvent("function_interacted", fn.name, {
@@ -318,7 +314,6 @@ function RunContractForm({
       fn={fn}
       onSubmit={onSubmit}
       setFormValid={setFormValid}
-      isView={false}
       result={
         connected ? (
           <Box>
@@ -455,32 +450,19 @@ function ReadContractForm({
 
   const onSubmit: SubmitHandler<ContractFormType> = async (data) => {
     logEvent("read_button_clicked", fn.name);
-    let viewRequest: Types.ViewRequest;
-    try {
-      viewRequest = {
-        function: `${module.address}::${module.name}::${fn.name}`,
-        type_arguments: data.typeArgs,
-        arguments: data.args.map((arg, i) => {
-          return encodeInputArgsForViewRequest(fn.params[i], arg);
-        }),
-      };
-    } catch (e: any) {
-      setErrMsg("Parsing arguments failed: " + e?.message);
-      return;
-    }
+    const viewRequest: Types.ViewRequest = {
+      function: `${module.address}::${module.name}::${fn.name}`,
+      type_arguments: data.typeArgs,
+      arguments: data.args,
+    };
     setInProcess(true);
     try {
-      const result = await view(
-        viewRequest,
-        state.network_value,
-        data.ledgerVersion,
-      );
+      const result = await view(viewRequest, state.network_value);
       setResult(result);
       setErrMsg(undefined);
       logEvent("function_interacted", fn.name, {txn_status: "success"});
     } catch (e: any) {
-      // Ensure error is a string
-      let error = e.message ?? JSON.stringify(e);
+      let error = e.message ?? String(e);
 
       const prefix = "Error:";
       if (error.startsWith(prefix)) {
@@ -499,7 +481,6 @@ function ReadContractForm({
       fn={fn}
       onSubmit={onSubmit}
       setFormValid={setFormValid}
-      isView={true}
       result={
         <Box>
           <StyledTooltip
@@ -609,13 +590,11 @@ function ContractForm({
   onSubmit,
   setFormValid,
   result,
-  isView,
 }: {
   fn: Types.MoveFunction;
   onSubmit: SubmitHandler<ContractFormType>;
   setFormValid: (valid: boolean) => void;
   result: ReactNode;
-  isView: boolean;
 }) {
   const {account} = useWallet();
   const {
@@ -630,12 +609,9 @@ function ContractForm({
     },
   });
 
-  const fnParams = removeSignerParam(fn);
-  const hasSigner = fnParams.length !== fn.params.length;
-
   useEffect(() => {
     setFormValid(isValid);
-  }, [isValid, setFormValid]);
+  }, [isValid]);
 
   return (
     <form onSubmit={handleSubmit(onSubmit)}>
@@ -668,7 +644,7 @@ function ContractForm({
                 )}
               />
             ))}
-            {hasSigner &&
+            {fn.is_entry &&
               (account ? (
                 <TextField
                   key="args-signer"
@@ -680,19 +656,17 @@ function ContractForm({
               ) : (
                 <TextField label="signer" disabled fullWidth />
               ))}
-            {fnParams.map((param, i) => {
-              // TODO: Need a nice way to differentiate between option and empty string
-              const isOption = param.startsWith("0x1::option::Option");
+            {fn.params.slice(fn.is_entry ? 1 : 0).map((param, i) => {
               return (
                 <Controller
                   key={`args-${i}`}
                   name={`args.${i}`}
                   control={control}
-                  rules={{required: !isOption}}
+                  rules={{required: true}}
                   render={({field: {onChange, value}}) => (
                     <TextField
                       onChange={onChange}
-                      value={isOption ? value : value ?? ""}
+                      value={value ?? ""}
                       label={`arg${i}: ${param}`}
                       fullWidth
                     />
@@ -701,33 +675,11 @@ function ContractForm({
               );
             })}
           </Stack>
-          {isView && (
-            <Stack spacing={4}>
-              <Controller
-                key={"ledgerVersion"}
-                name={"ledgerVersion"}
-                control={control}
-                rules={{required: false}}
-                render={({field: {onChange, value}}) => (
-                  <TextField
-                    onChange={onChange}
-                    value={value}
-                    label={"ledgerVersion: defaults to current version"}
-                    fullWidth
-                  />
-                )}
-              />
-            </Stack>
-          )}
           {result}
         </Stack>
       </Box>
     </form>
   );
-}
-
-function removeSignerParam(fn: Types.MoveFunction) {
-  return fn.params.filter((p) => p !== "signer" && p !== "&signer");
 }
 
 export default Contract;

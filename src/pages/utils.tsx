@@ -14,21 +14,8 @@ function ensureMillisecondTimestamp(timestamp: string): number {
   return parseInt(timestamp);
 }
 
-export function parseTimestamp(
-  timestamp: string,
-  ensureMilliSeconds: boolean = true,
-): moment.Moment {
-  if (ensureMilliSeconds) {
-    return moment(ensureMillisecondTimestamp(timestamp));
-  } else {
-    return moment(parseInt(timestamp));
-  }
-}
-
-// expiration_timestamp can be user inputted so we don't want to do any ensuring of milliseconds
-// but it comes back at a different factor than what we need for parsing on the frontend
-export function parseExpirationTimestamp(timestamp: string) {
-  return timestamp + "000";
+export function parseTimestamp(timestamp: string): moment.Moment {
+  return moment(ensureMillisecondTimestamp(timestamp));
 }
 
 export interface TimestampDisplay {
@@ -59,7 +46,7 @@ function truncate(
     throw `${frontLen} and ${backLen} should be an Integer`;
   }
 
-  const strLen = str.length;
+  var strLen = str.length;
   // Setting default values
   frontLen = frontLen;
   backLen = backLen;
@@ -122,13 +109,4 @@ export function getTableFormattedTimestamp(timestamp?: string): string {
   const timestamp_display = timestampDisplay(moment);
 
   return timestamp_display.local_formatted;
-}
-
-export function isValidUrl(url: string): boolean {
-  try {
-    new URL(url);
-    return true;
-  } catch (_) {
-    return false;
-  }
 }

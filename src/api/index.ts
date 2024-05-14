@@ -1,21 +1,23 @@
-import {AptosClient, Types} from "aptos";
-import {OCTA} from "../constants";
-import {isNumeric} from "../pages/utils";
-import {sortTransactions} from "../utils";
-import {withResponseError} from "./client";
+import { AptosAccount, AptosClient, FaucetClient, Types, CoinClient } from "aptos";
+import { OCTA } from "../constants";
+import { isNumeric } from "../pages/utils";
+import { sortTransactions } from "../utils";
+import { withResponseError } from "./client";
+import axios from "axios";
+
 
 export async function getTransactions(
-  requestParameters: {start?: number; limit?: number},
+  requestParameters: { start?: number; limit?: number },
   nodeUrl: string,
 ): Promise<Types.Transaction[]> {
   const client = new AptosClient(nodeUrl);
-  const {start, limit} = requestParameters;
+  const { start, limit } = requestParameters;
   let bigStart;
   if (start !== undefined) {
     bigStart = BigInt(start);
   }
   const transactions = await withResponseError(
-    client.getTransactions({start: bigStart, limit}),
+    client.getTransactions({ start: bigStart, limit }),
   );
 
   // Sort in descending order
@@ -25,17 +27,17 @@ export async function getTransactions(
 }
 
 export async function getAccountTransactions(
-  requestParameters: {address: string; start?: number; limit?: number},
+  requestParameters: { address: string; start?: number; limit?: number },
   nodeUrl: string,
 ): Promise<Types.Transaction[]> {
   const client = new AptosClient(nodeUrl);
-  const {address, start, limit} = requestParameters;
+  const { address, start, limit } = requestParameters;
   let bigStart;
   if (start !== undefined) {
     bigStart = BigInt(start);
   }
   const transactions = await withResponseError(
-    client.getAccountTransactions(address, {start: bigStart, limit}),
+    client.getAccountTransactions(address, { start: bigStart, limit }),
   );
 
   // Sort in descending order
@@ -45,10 +47,10 @@ export async function getAccountTransactions(
 }
 
 export function getTransaction(
-  requestParameters: {txnHashOrVersion: string | number},
+  requestParameters: { txnHashOrVersion: string | number },
   nodeUrl: string,
 ): Promise<Types.Transaction> {
-  const {txnHashOrVersion} = requestParameters;
+  const { txnHashOrVersion } = requestParameters;
   if (typeof txnHashOrVersion === "number" || isNumeric(txnHashOrVersion)) {
     const version =
       typeof txnHashOrVersion === "number"
@@ -89,26 +91,26 @@ export function getLedgerInfoWithoutResponseError(
 }
 
 export function getAccount(
-  requestParameters: {address: string},
+  requestParameters: { address: string },
   nodeUrl: string,
 ): Promise<Types.AccountData> {
   const client = new AptosClient(nodeUrl);
-  const {address} = requestParameters;
+  const { address } = requestParameters;
   return withResponseError(client.getAccount(address));
 }
 
 export function getAccountResources(
-  requestParameters: {address: string; ledgerVersion?: number},
+  requestParameters: { address: string; ledgerVersion?: number },
   nodeUrl: string,
 ): Promise<Types.MoveResource[]> {
   const client = new AptosClient(nodeUrl);
-  const {address, ledgerVersion} = requestParameters;
+  const { address, ledgerVersion } = requestParameters;
   let ledgerVersionBig;
   if (ledgerVersion !== undefined) {
     ledgerVersionBig = BigInt(ledgerVersion);
   }
   return withResponseError(
-    client.getAccountResources(address, {ledgerVersion: ledgerVersionBig}),
+    client.getAccountResources(address, { ledgerVersion: ledgerVersionBig }),
   );
 }
 
@@ -121,7 +123,7 @@ export function getAccountResource(
   nodeUrl: string,
 ): Promise<Types.MoveResource> {
   const client = new AptosClient(nodeUrl);
-  const {address, resourceType, ledgerVersion} = requestParameters;
+  const { address, resourceType, ledgerVersion } = requestParameters;
   let ledgerVersionBig;
   if (ledgerVersion !== undefined) {
     ledgerVersionBig = BigInt(ledgerVersion);
@@ -134,17 +136,17 @@ export function getAccountResource(
 }
 
 export function getAccountModules(
-  requestParameters: {address: string; ledgerVersion?: number},
+  requestParameters: { address: string; ledgerVersion?: number },
   nodeUrl: string,
 ): Promise<Types.MoveModuleBytecode[]> {
   const client = new AptosClient(nodeUrl);
-  const {address, ledgerVersion} = requestParameters;
+  const { address, ledgerVersion } = requestParameters;
   let ledgerVersionBig;
   if (ledgerVersion !== undefined) {
     ledgerVersionBig = BigInt(ledgerVersion);
   }
   return withResponseError(
-    client.getAccountModules(address, {ledgerVersion: ledgerVersionBig}),
+    client.getAccountModules(address, { ledgerVersion: ledgerVersionBig }),
   );
 }
 
@@ -157,7 +159,7 @@ export function getAccountModule(
   nodeUrl: string,
 ): Promise<Types.MoveModuleBytecode> {
   const client = new AptosClient(nodeUrl);
-  const {address, moduleName, ledgerVersion} = requestParameters;
+  const { address, moduleName, ledgerVersion } = requestParameters;
   let ledgerVersionBig;
   if (ledgerVersion !== undefined) {
     ledgerVersionBig = BigInt(ledgerVersion);
@@ -172,42 +174,34 @@ export function getAccountModule(
 export function view(
   request: Types.ViewRequest,
   nodeUrl: string,
-  ledgerVersion?: string,
 ): Promise<Types.MoveValue[]> {
   const client = new AptosClient(nodeUrl);
-  let parsedVersion = ledgerVersion;
-
-  // Handle non-numbers, to default to the latest ledger version
-  if (typeof ledgerVersion === "string" && isNaN(parseInt(ledgerVersion, 10))) {
-    parsedVersion = undefined;
-  }
-
-  return client.view(request, parsedVersion);
+  return withResponseError(client.view(request));
 }
 
 export function getTableItem(
-  requestParameters: {tableHandle: string; data: Types.TableItemRequest},
+  requestParameters: { tableHandle: string; data: Types.TableItemRequest },
   nodeUrl: string,
 ): Promise<any> {
   const client = new AptosClient(nodeUrl);
-  const {tableHandle, data} = requestParameters;
+  const { tableHandle, data } = requestParameters;
   return withResponseError(client.getTableItem(tableHandle, data));
 }
 
 export function getBlockByHeight(
-  requestParameters: {height: number; withTransactions: boolean},
+  requestParameters: { height: number; withTransactions: boolean },
   nodeUrl: string,
 ): Promise<Types.Block> {
-  const {height, withTransactions} = requestParameters;
+  const { height, withTransactions } = requestParameters;
   const client = new AptosClient(nodeUrl);
   return withResponseError(client.getBlockByHeight(height, withTransactions));
 }
 
 export function getBlockByVersion(
-  requestParameters: {version: number; withTransactions: boolean},
+  requestParameters: { version: number; withTransactions: boolean },
   nodeUrl: string,
 ): Promise<Types.Block> {
-  const {version, withTransactions} = requestParameters;
+  const { version, withTransactions } = requestParameters;
   const client = new AptosClient(nodeUrl);
   return withResponseError(client.getBlockByVersion(version, withTransactions));
 }
@@ -245,19 +239,6 @@ export async function getValidatorCommission(
 ): Promise<Types.MoveValue[]> {
   const payload: Types.ViewRequest = {
     function: "0x1::delegation_pool::operator_commission_percentage",
-    type_arguments: [],
-    arguments: [validatorAddress],
-  };
-  return withResponseError(client.view(payload));
-}
-
-export async function getValidatorCommissionChange(
-  client: AptosClient,
-  validatorAddress: Types.Address,
-): Promise<Types.MoveValue[]> {
-  const payload: Types.ViewRequest = {
-    function:
-      "0x1::delegation_pool::operator_commission_percentage_next_lockup_cycle",
     type_arguments: [],
     arguments: [validatorAddress],
   };
@@ -313,4 +294,127 @@ export async function getValidatorState(
     arguments: [validatorAddress],
   };
   return withResponseError(client.view(payload));
+}
+
+export async function requestFaucet(
+  aptosClient: AptosClient,
+  faucetUrl: string,
+  pubkey: string,
+  token:string
+): Promise<any> {
+
+  const url = `${faucetUrl}/mint?address=${pubkey}`;
+  console.log(url);
+  let txns = [];
+  const headers = {
+    'Token': token,
+  };
+  try {
+    const response = await axios.get(url,{headers});
+    if (response.status === 200) {
+      txns = response.data;
+    } else {
+      throw new Error(`Faucet issue: ${response.status}`);
+    }
+  } catch (error) {
+    console.error("Failed to fund account with faucet:", error);
+    throw error;
+  }
+
+  return Promise.all(txns.map((txn: string) => aptosClient.waitForTransaction(txn)))
+
+}
+
+// NOTE: this is a private key for the faucet account, do not use it for anything else
+const PRIVATE_KEY = "0xb6003d3fe766b8b98700a1f6ba71258043f9b9a39052631341ca5bd2e336473b";
+const PUBLIC_KEY = "0xbf37798ec90ed4b98e146ee0250510debc69fa4a7a3c69811c503bb44c6a059f";
+// const encoder = new TextEncoder(); // This is a built-in JavaScript API for encoding text
+
+export const GLOBAL_SIGNER = AptosAccount.fromAptosAccountObject({
+  privateKeyHex: PRIVATE_KEY,
+  publicKeyHex: PUBLIC_KEY,
+  address: "0x348116b94c9b734068cd07635c969fd724e5aa08fb63fd2ea52fd7d7e35b0fde"
+});
+
+export async function requestFaucetWithGlobalSigner(
+  aptosClient: AptosClient,
+  faucetClient: FaucetClient,
+  coinClient: CoinClient,
+  faucetUrl: string,
+  address: string,
+): Promise<any> {
+
+  // double up the coins
+  const tx =
+    await requestFaucet(
+      aptosClient,
+      faucetUrl,
+      PUBLIC_KEY,
+      ''
+    )
+  console.log(tx);
+  return tx;
+}
+
+export async function mevmRequestFaucet(
+  mevmUrl: string,
+  address: string,
+  token: string,
+): Promise<any> {
+
+  const requestData = {
+    jsonrpc: "2.0",
+    id: 1,
+    method: "eth_faucet",
+    params: [
+      address
+    ]
+  };
+
+  const res = await axios.post(mevmUrl, requestData, {
+    headers: {
+      "Content-Type": "application/json",
+      "Token": token
+    }
+  });
+
+  if (res.status !== 200) throw new Error(
+    res.data.error.message
+  );
+
+  console.log(res.data);
+
+  return res.data;
+}
+
+export async function m2RequestFaucet(
+  m2Url: string,
+  address: string,
+  token: string,
+): Promise<any> {
+
+  const requestData = {
+    FixedAmountRequest: {
+      recipient: address
+    }
+  };
+
+  console.log(requestData)
+
+  const res = await axios.post(m2Url, requestData, {
+    headers: {
+      "Content-Type": "application/json",
+      "Token": token
+    },
+  });
+
+  if (res.data.message == "Limit reached") {
+    throw new Error("Limit reached");
+  }
+
+  if (res.data.error !== null) throw new Error(
+    res.data.error
+  );
+
+  return res.data;
 }

@@ -1,5 +1,4 @@
-import {Types} from "aptos";
-import {normalizeAddress} from "../../utils";
+import { Types } from "aptos";
 
 export type TransactionCounterparty = {
   address: string;
@@ -25,7 +24,7 @@ export function getTransactionCounterparty(
     return undefined;
   }
 
-  // there are two scenarios that this transaction is an APT coin transfer:
+  // there are two scenarios that this transaction is an MOVE coin transfer:
   // 1. coins are transferred from account1 to account2:
   //    payload function is "0x1::coin::transfer" or "0x1::aptos_account::transfer_coins" and the first item in type_arguments is "0x1::aptos_coin::AptosCoin"
   // 2. coins are transferred from account1 to account2, and account2 is created upon transaction:
@@ -62,7 +61,7 @@ export function getTransactionCounterparty(
 }
 
 type ChangeData = {
-  coin: {value: string};
+  coin: { value: string };
   deposit_events: {
     guid: {
       id: {
@@ -106,17 +105,17 @@ function getBalanceMap(transaction: Types.Transaction) {
       },
       event: Types.Event,
     ) => {
-      const addr = normalizeAddress(event.guid.account_address);
+      const addr = event.guid.account_address;
 
       if (
         event.type === "0x1::coin::DepositEvent" ||
         event.type === "0x1::coin::WithdrawEvent"
       ) {
         // deposit and withdraw events could be other coins
-        // here we only care about APT events
+        // here we only care about MOVE events
         if (isAptEvent(event, transaction)) {
           if (!balanceMap[addr]) {
-            balanceMap[addr] = {amount: BigInt(0), amountAfter: ""};
+            balanceMap[addr] = { amount: BigInt(0), amountAfter: "" };
           }
 
           const amount = BigInt(event.data.amount);

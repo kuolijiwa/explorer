@@ -1,25 +1,22 @@
 import {useWallet} from "@aptos-labs/wallet-adapter-react";
 import {Box, Typography} from "@mui/material";
+import * as React from "react";
 import {useEffect} from "react";
-import {useConfig} from "statsig-react";
+import {Statsig, useConfig} from "statsig-react";
 import {STAKING_BANNER_CONFIG_NAME} from "../../dataConstants";
 import {useGlobalState} from "../../global-config/GlobalConfig";
 import PageHeader from "../layout/PageHeader";
 import {StakingBanner} from "./StakingBanner";
 import ValidatorsPageTabs from "./Tabs";
 import ValidatorsMap from "./ValidatorsMap";
-import {getStableID} from "../../utils";
-import {useLogEventWithBasic} from "../Account/hooks/useLogEventWithBasic";
-import {CommissionChangeBanner} from "./CommissionChangeBanner";
 
 export default function ValidatorsPage() {
-  const [state] = useGlobalState();
+  const [state, _] = useGlobalState();
   const {account, wallet} = useWallet();
   const {config} = useConfig(STAKING_BANNER_CONFIG_NAME);
   const viewCountCap = config.getValue("view_count");
-  const logEvent = useLogEventWithBasic();
   // Get the user's stable ID
-  const stableID = getStableID();
+  const stableID = Statsig.getStableID();
 
   // Create a key for storing the view count and last visit timestamp in localStorage
   const viewCountKey = `${stableID}_view_count`;
@@ -47,13 +44,16 @@ export default function ValidatorsPage() {
         localStorage.setItem(lastVisitKey, String(currentTimestamp));
       }
 
-      logEvent("staking_banner_viewed", localStorage.getItem(viewCountKey), {
-        wallet_address: account?.address ?? "",
-        wallet_name: wallet?.name ?? "",
-        timestamp: localStorage.getItem(lastVisitKey) ?? "",
-      });
+      Statsig.logEvent(
+        "staking_banner_viewed",
+        localStorage.getItem(viewCountKey),
+        {
+          wallet_address: account?.address ?? "",
+          wallet_name: wallet?.name ?? "",
+          timestamp: localStorage.getItem(lastVisitKey) ?? "",
+        },
+      );
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (
@@ -62,7 +62,6 @@ export default function ValidatorsPage() {
       <Typography variant="h3" marginBottom={2}>
         Validators
       </Typography>
-      <CommissionChangeBanner />
       {currentViewCount &&
       viewCountCap &&
       Number(currentViewCount) <= Number(viewCountCap) ? (

@@ -19,17 +19,17 @@ export function useGetAccountResource(
   address: string,
   resource: string,
 ): UseQueryResult<Types.MoveResource, ResponseError> {
-  const [state] = useGlobalState();
+  const [state, _setState] = useGlobalState();
 
-  return useQuery<Types.MoveResource, ResponseError>({
-    queryKey: ["accountResource", {address, resource}, state.network_value],
-    queryFn: () =>
+  return useQuery<Types.MoveResource, ResponseError>(
+    ["accountResource", {address, resource}, state.network_value],
+    () =>
       getAccountResource(
         {address, resourceType: resource},
         state.network_value,
       ),
-    refetchOnWindowFocus: false,
-  });
+    {refetchOnWindowFocus: false},
+  );
 }
 
 export function useGetAccountPackages(address: string) {

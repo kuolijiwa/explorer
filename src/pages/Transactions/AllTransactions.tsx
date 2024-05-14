@@ -1,9 +1,5 @@
 import React from "react";
-import {
-  keepPreviousData,
-  useQuery,
-  UseQueryResult,
-} from "@tanstack/react-query";
+import {useQuery, UseQueryResult} from "@tanstack/react-query";
 import {Types} from "aptos";
 import {getLedgerInfo, getTransactions} from "../../api";
 import {useGlobalState} from "../../global-config/GlobalConfig";
@@ -74,20 +70,20 @@ function TransactionContent({data}: UseQueryResult<Array<Types.Transaction>>) {
 function TransactionsPageInner({data}: UseQueryResult<Types.IndexResponse>) {
   const maxVersion = parseInt(data?.ledger_version ?? "");
   const limit = LIMIT;
-  const [state] = useGlobalState();
-  const [searchParams] = useSearchParams();
+  const [state, _setState] = useGlobalState();
+  const [searchParams, _setSearchParams] = useSearchParams();
 
   let start = maxStart(maxVersion, limit);
-  const startParam = searchParams.get("start");
+  let startParam = searchParams.get("start");
   if (startParam !== null) {
     start = parseInt(startParam);
   }
 
-  const result = useQuery({
-    queryKey: ["transactions", {start, limit}, state.network_value],
-    queryFn: () => getTransactions({start, limit}, state.network_value),
-    placeholderData: keepPreviousData,
-  });
+  const result = useQuery(
+    ["transactions", {start, limit}, state.network_value],
+    () => getTransactions({start, limit}, state.network_value),
+    {keepPreviousData: true},
+  );
 
   return (
     <>
@@ -111,13 +107,15 @@ function TransactionsPageInner({data}: UseQueryResult<Types.IndexResponse>) {
 }
 
 export default function AllTransactions() {
-  const [state] = useGlobalState();
+  const [state, _] = useGlobalState();
 
-  const result = useQuery({
-    queryKey: ["ledgerInfo", state.network_value],
-    queryFn: () => getLedgerInfo(state.network_value),
-    refetchInterval: 10000,
-  });
+  const result = useQuery(
+    ["ledgerInfo", state.network_value],
+    () => getLedgerInfo(state.network_value),
+    {
+      refetchInterval: 10000,
+    },
+  );
 
   return <TransactionsPageInner {...result} />;
 }

@@ -14,7 +14,6 @@ export type AnalyticsData = {
   daily_max_tps_15_blocks: DailyPeakTPSData[];
   daily_new_accounts_created: DailyNewAccountData[];
   daily_user_transactions: DailyUserTxnData[];
-  mau_signers: MonthlyActiveUserData[];
   max_tps_15_blocks_in_past_30_days: {
     max_tps_15_blocks_in_past_30_days: number;
   }[];
@@ -28,8 +27,7 @@ export type DailyAnalyticsData =
   | DailyContractData
   | DailyPeakTPSData
   | DailyNewAccountData
-  | DailyUserTxnData
-  | MonthlyActiveUserData;
+  | DailyUserTxnData;
 
 export type DailyActiveUserData = {
   daily_active_user_count: number;
@@ -71,13 +69,8 @@ export type DailyUserTxnData = {
   date: string;
 };
 
-export type MonthlyActiveUserData = {
-  mau_signer_30: number;
-  date: string;
-};
-
 export function useGetAnalyticsData() {
-  const [state] = useGlobalState();
+  const [state, _] = useGlobalState();
   const [data, setData] = useState<AnalyticsData>();
 
   useEffect(() => {

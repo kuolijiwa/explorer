@@ -20,9 +20,9 @@ import {useParams} from "react-router-dom";
 import {useLogEventWithBasic} from "../hooks/useLogEventWithBasic";
 
 function useStartingLineNumber(sourceCode?: string) {
-  const functionToHighlight = useParams().selectedFnName;
-
   if (!sourceCode) return 0;
+
+  const functionToHighlight = useParams().selectedFnName;
   if (!functionToHighlight) return 0;
 
   return getPublicFunctionLineNumber(sourceCode, functionToHighlight);
@@ -116,7 +116,7 @@ export function Code({bytecode}: {bytecode: string}) {
   const theme = useTheme();
   const [tooltipOpen, setTooltipOpen] = useState<boolean>(false);
 
-  async function copyCode() {
+  async function copyCode(event: React.MouseEvent<HTMLButtonElement>) {
     if (!sourceCode) return;
 
     await navigator.clipboard.writeText(sourceCode);
@@ -154,7 +154,7 @@ export function Code({bytecode}: {bytecode: string}) {
           <Typography fontSize={20} fontWeight={700}>
             Code
           </Typography>
-          <StyledLearnMoreTooltip text="Please be aware that this code was provided by the owner and it could be different to the real code on blockchain. We cannot verify it." />
+          <StyledLearnMoreTooltip text="Please be aware that this code was provided by the owner and it could be different to the real code on blockchain. We can not not verify it." />
         </Stack>
         {sourceCode && (
           <Stack direction="row" spacing={2}>
@@ -168,9 +168,9 @@ export function Code({bytecode}: {bytecode: string}) {
             >
               <Button
                 variant="outlined"
-                onClick={() => {
+                onClick={(source) => {
                   logEvent("copy_code_button_clicked", selectedModuleName);
-                  copyCode();
+                  copyCode(source);
                 }}
                 disabled={!sourceCode}
                 sx={{

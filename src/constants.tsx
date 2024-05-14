@@ -2,15 +2,15 @@
  * Network
  */
 export const devnetUrl =
-  import.meta.env.APTOS_DEVNET_URL || "https://api.devnet.aptoslabs.com/v1";
+  process.env.APTOS_DEVNET_URL || "https://fullnode.devnet.aptoslabs.com/";
 
 export const networks = {
-  mainnet: "https://api.mainnet.aptoslabs.com/v1",
-  testnet: "https://api.testnet.aptoslabs.com/v1",
+  mainnet: "https://fullnode.mainnet.aptoslabs.com/",
+  testnet: "https://seed-node1.movementlabs.xyz",
   devnet: devnetUrl,
-  local: "http://127.0.0.1:8080/v1",
-  previewnet: "https://fullnode.previewnet.aptoslabs.com/v1",
-  randomnet: "https://fullnode.random.aptoslabs.com/v1",
+  local: "https://seed-node1.movementlabs.xyz",
+  // local: "https://submove-fuji.bbd.sh/v1",
+  previewnet: "https://fullnode-0.previewnet.gcp.aptosdev.com/v1",
 };
 
 export type NetworkName = keyof typeof networks;
@@ -25,7 +25,6 @@ export enum Network {
   DEVNET = "devnet",
   LOCAL = "local",
   PREVIEWNET = "previewnet",
-  RANDOMNET = "randomnet",
 }
 
 // Remove trailing slashes
@@ -36,7 +35,7 @@ for (const key of Object.keys(networks)) {
   }
 }
 
-export const defaultNetworkName: NetworkName = "mainnet" as const;
+export const defaultNetworkName: NetworkName = "devnet" as const;
 
 if (!(defaultNetworkName in networks)) {
   throw `defaultNetworkName '${defaultNetworkName}' not in Networks!`;
@@ -78,14 +77,7 @@ export const defaultFeature = features[defaultFeatureName];
  * Delegation Service
  */
 export const OCTA = 100000000;
-export const WHILTELISTED_TESTNET_DELEGATION_NODES = import.meta.env
+export const WHILTELISTED_TESTNET_DELEGATION_NODES = process.env
   .REACT_APP_WHILTELISTED_TESTNET_DELEGATION_NODES
-  ? import.meta.env.REACT_APP_WHILTELISTED_TESTNET_DELEGATION_NODES.split(",")
+  ? process.env.REACT_APP_WHILTELISTED_TESTNET_DELEGATION_NODES.split(",")
   : null;
-
-/**
- * Core Address
- */
-export const objectCoreAddress = "0x1::object::ObjectCore";
-export const tokenV2Address = "0x4::token::Token";
-export const collectionV2Address = "0x4::collection::Collection";

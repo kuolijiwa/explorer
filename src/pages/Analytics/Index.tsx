@@ -6,7 +6,7 @@ import PageHeader from "../layout/PageHeader";
 import MainnetAnalytics from "./MainnetAnalytics";
 
 export default function AnalyticsPage() {
-  const [state] = useGlobalState();
+  const [state, _] = useGlobalState();
 
   const titleComponent = (
     <Typography variant="h3" marginBottom={2}>

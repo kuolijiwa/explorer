@@ -28,7 +28,7 @@ export default function TableTooltip({children, title}: TableTooltipProps) {
       <Modal open={open} onClose={handleClose}>
         <Box
           sx={{
-            position: "absolute" as const,
+            position: "absolute" as "absolute",
             top: "50%",
             left: "50%",
             transform: "translate(-50%, -50%)",

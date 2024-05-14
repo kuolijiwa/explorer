@@ -1,5 +1,13 @@
-import {expect, it} from "vitest";
-import {getPublicFunctionLineNumber} from "./utils";
+import {expect, it} from "@jest/globals";
+import {getPublicFunctionLineNumber, truncateAptSuffix} from "../utils";
+it("truncate apt suffix from ANS name correctly", () => {
+  expect(truncateAptSuffix("name.")).toEqual("name");
+  expect(truncateAptSuffix("name.a")).toEqual("name");
+  expect(truncateAptSuffix("name.ap")).toEqual("name");
+  expect(truncateAptSuffix("name.apt")).toEqual("name");
+  expect(truncateAptSuffix("na1m-e.a")).toEqual("na1m-e");
+  expect(truncateAptSuffix("nam-e1.ap")).toEqual("nam-e1");
+});
 
 it("test getPublicFunctionLineNumber", () => {
   // Cannot get struct line number
