@@ -304,14 +304,12 @@ export async function requestFaucet(
 ): Promise<any> {
 
   const url = `${faucetUrl}/mint?address=${pubkey}`;
-  console.log(url);
   let txns = [];
   const headers = {
     'Token': token,
   };
   try {
     const response = await axios.get(url,{headers});
-    console.log('response:', response);
     if (response.status === 200) {
       // return {success:response.data};
       if (response.data.error_message) {
@@ -361,7 +359,6 @@ export async function requestFaucetWithGlobalSigner(
       PUBLIC_KEY,
       ''
     )
-  console.log(tx);
   return tx;
 }
 
@@ -424,7 +421,6 @@ export async function m2RequestFaucet(
     redirect: "follow"
   };
 
-  console.log(requestData)
 
   // const res = await axios.post(m2Url, requestData, {
   //   headers: {
@@ -436,10 +432,10 @@ export async function m2RequestFaucet(
   try{
     const res:any = await fetch(m2Url, requestOptions) .then((response) => response.text());
     const res1 = JSON.parse(res);
-    console.log("res66=",res1);
-    console.log("res66=",res1.code);
-    console.log("res66=",res1.message);
-    console.log("res66=",res1.message?.message);
+    // console.log("res66=",res1);
+    // console.log("res66=",res1.code);
+    // console.log("res66=",res1.message);
+    // console.log("res66=",res1.message?.message);
     // .then((result) => console.log(result))
     // .catch((error) => console.error(error));
 

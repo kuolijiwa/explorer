@@ -45,7 +45,7 @@ export default function LandingPage({ name, amount, hasEvm, faucetRequest, evmRe
         recaptchaRef.current?.reset();
         setToken(null);
         const res = mevm ? await evmRequest(address,token) : await faucetRequest(address,token);
-        console.log('res=',res);
+        // console.log('res=',res);
         if (res && res.success) {
             setSuccess(true);
         } else{
