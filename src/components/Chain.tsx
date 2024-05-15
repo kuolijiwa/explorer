@@ -3,18 +3,19 @@ import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import { useState,RefObject } from "react";
 import WaterDropIcon from '@mui/icons-material/Opacity';
-import { to } from "await-to-js";
+// import { to } from "await-to-js";
 import TextField from "@mui/material/TextField";
 import Container from "@mui/material/Container";
 import Alert from "@mui/material/Alert";
 import CircularProgress from "@mui/material/CircularProgress";
-import { AptosClient, FaucetClient, CoinClient } from "aptos";
+// import { AptosClient, FaucetClient, CoinClient } from "aptos";
 import { Switch } from "@mui/material";
 import FormControlLabel from '@mui/material/FormControlLabel';
 import { Network } from "../utils";
 // import {ReCAPTCHA} from "@types/react-google-recaptcha";
 import ReCAPTCHA from "react-google-recaptcha";
-import { set } from "lodash";
+import {useMediaQuery, useTheme} from "@mui/material";
+// import { set } from "lodash";
 
 export default function LandingPage({ name, amount, hasEvm, faucetRequest, evmRequest, network, hasTestnet, toggleNetwork }: any) {
 
@@ -24,6 +25,13 @@ export default function LandingPage({ name, amount, hasEvm, faucetRequest, evmRe
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState(false);
     const [token, setToken] = useState<string|null>(null);
+    const theme = useTheme();
+    const [isDark, setIsDark] = useState(theme.palette.mode === "dark");
+
+    useEffect(() => {
+        setIsDark(theme.palette.mode === "dark");
+    }, [theme]);
+    
 
     // decay the success state
     useEffect(() => {
@@ -147,13 +155,25 @@ export default function LandingPage({ name, amount, hasEvm, faucetRequest, evmRe
                     </Button>
                     <div>
                         {/* <form onSubmit={onSubmitWithReCAPTCHA} > */}
-                            <ReCAPTCHA
-                                ref={recaptchaRef}
-                                sitekey="6LeNltspAAAAAECHmsdf8w29UFF3ZiIrvscSkMTi"
-                                // size="invisible"
-                                hl="en"
-                                onChange={onChangeRe}
-                            />
+                                {isDark &&
+                                <ReCAPTCHA
+                                    ref={recaptchaRef}
+                                    sitekey="6LeNltspAAAAAECHmsdf8w29UFF3ZiIrvscSkMTi"
+                                    // size="invisible"
+                                    hl="en"
+                                    onChange={onChangeRe}
+                                    theme="dark"
+                                />}
+                                {!isDark &&
+                                    <ReCAPTCHA
+                                        ref={recaptchaRef}
+                                        sitekey="6LeNltspAAAAAECHmsdf8w29UFF3ZiIrvscSkMTi"
+                                        // size="invisible"
+                                        hl="en"
+                                        onChange={onChangeRe}
+                                        theme="light"
+                                    />
+                                }
                         {/* </form> */}
                     </div>
                     {success && <Alert severity="success" sx={{ width: 300, marginBottom: 2 }}>Funded account {_amount} MOVE</Alert>}
