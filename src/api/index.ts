@@ -414,23 +414,43 @@ export async function m2RequestFaucet(
       recipient: address
     }
   };
+  const myHeaders = new Headers();
+  myHeaders.append("Token", token);
+  myHeaders.append("Content-Type", "application/json");
+  const requestOptions:any = {
+    method: "POST",
+    headers: myHeaders,
+    body: JSON.stringify(requestData),
+    redirect: "follow"
+  };
 
   console.log(requestData)
 
-  const res = await axios.post(m2Url, requestData, {
-    headers: {
-      "Content-Type": "application/json",
-      "Token": token
-    },
-  });
+  // const res = await axios.post(m2Url, requestData, {
+  //   headers: {
+  //     "Content-Type": "application/json",
+  //     "Token": token
+  //   },
+  // });
 
-  if (res.data.message == "Limit reached") {
-    throw new Error("Limit reached");
+  try{
+    const res:any = await fetch(m2Url, requestOptions) .then((response) => response.text());
+    const res1 = JSON.parse(res);
+    console.log("res66=",res1);
+    console.log("res66=",res1.code);
+    console.log("res66=",res1.message);
+    console.log("res66=",res1.message?.message);
+    // .then((result) => console.log(result))
+    // .catch((error) => console.error(error));
+
+    if (res1.code == 200) {
+      return {success:res1};
+    }else{
+      return {error:res1.message?.message||res1.message};
+    }
+  }catch(e){
+    return {error:'Limit reached'};
   }
 
-  if (res.data.error !== null) throw new Error(
-    res.data.error
-  );
-
-  return res.data;
+  // throw new Error("Limit reached");
 }

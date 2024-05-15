@@ -14,6 +14,7 @@ import FormControlLabel from '@mui/material/FormControlLabel';
 import { Network } from "../utils";
 // import {ReCAPTCHA} from "@types/react-google-recaptcha";
 import ReCAPTCHA from "react-google-recaptcha";
+import { set } from "lodash";
 
 export default function LandingPage({ name, amount, hasEvm, faucetRequest, evmRequest, network, hasTestnet, toggleNetwork }: any) {
 
@@ -41,6 +42,8 @@ export default function LandingPage({ name, amount, hasEvm, faucetRequest, evmRe
 
     const handleRequest = async () => {
         setLoading(true);
+        recaptchaRef.current?.reset();
+        setToken(null);
         const res = mevm ? await evmRequest(address,token) : await faucetRequest(address,token);
         console.log('res=',res);
         if (res && res.success) {
@@ -73,7 +76,7 @@ export default function LandingPage({ name, amount, hasEvm, faucetRequest, evmRe
         setToken(value);
       }
 
-      const recaptchaRef: RefObject<ReCAPTCHA> = React.createRef();
+    const recaptchaRef: RefObject<ReCAPTCHA> = React.createRef();
 
     const onSubmitWithReCAPTCHA = async () => {
         const token = recaptchaRef.current?.getValue();
